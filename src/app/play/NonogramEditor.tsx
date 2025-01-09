@@ -1,11 +1,12 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Row } from "./Row";
+
 import { Cell } from "./Cell";
 import { CellButton } from "./CellButton";
-import { VHead } from "./VHead";
 import { HHead } from "./HHead";
+import { Row } from "./Row";
+import { VHead } from "./VHead";
 
 const sizes = [5, 10, 15, 20];
 
@@ -24,7 +25,7 @@ export const NonogramEditor: FC = () => {
           ))}
         </select>
       </div>
-      <table className="border-2 border-solid select-none [&_th]:bg-slate-200">
+      <table className="select-none border-2 border-solid [&_th]:bg-slate-200 ">
         <thead className="border-b-2">
           <Row>
             <VHead />

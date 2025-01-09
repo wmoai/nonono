@@ -6,7 +6,7 @@ type Props = {
 
 export const CellButton: FC<Props> = ({ children }) => {
   return (
-    <button type="button" className="w-6 h-6 aria-pressed:bg-black">
+    <button type="button" className="size-6 aria-pressed:bg-black">
       {children}
     </button>
   );
