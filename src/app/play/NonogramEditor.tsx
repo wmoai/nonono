@@ -25,7 +25,7 @@ export const NonogramEditor: FC = () => {
           ))}
         </select>
       </div>
-      <table className="select-none border-2 border-solid [&_th]:bg-slate-200 ">
+      <table className="select-none border-2 border-solid [&_th]:border [&_th]:bg-slate-200 ">
         <thead className="border-b-2">
           <Row>
             <VHead />
