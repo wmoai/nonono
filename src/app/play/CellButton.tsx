@@ -21,9 +21,9 @@ export const CellButton: FC<Props> = ({
       onPointerMove={onPointerOver}
       onPointerUp={onPointerUp}
     >
-      {state === "o" && <div className="absolute inset-0 bg-black" />}
+      {state === "o" && <div className="absolute inset-0 bg-mark" />}
       {state === "x" && (
-        <div className="[&>*]:absolute [&>*]:inset-x-0 [&>*]:h-px [&>*]:bg-black">
+        <div className="[&>*]:absolute [&>*]:inset-x-0 [&>*]:h-px [&>*]:bg-mark">
           <div className="skew-y-[-45deg]" />
           <div className="skew-y-[45deg]" />
         </div>
