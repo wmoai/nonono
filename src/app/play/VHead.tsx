@@ -6,8 +6,8 @@ type Props = {
 
 export const VHead: FC<Props> = ({ children }) => {
   return (
-    <th className="px-0 py-2 [&:nth-child(5n+2)]:border-l-2">
-      <div className="min-h-24 min-w-4">{children}</div>
+    <th className="relative p-0 after:pointer-events-none after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-border first:after:hidden [&:nth-child(5n+2)]:after:-left-px [&:nth-child(5n+2)]:after:w-[2px]">
+      <div className="min-h-24 min-w-4 py-2">{children}</div>
     </th>
   );
 };

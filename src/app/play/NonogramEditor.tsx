@@ -25,8 +25,8 @@ export const NonogramEditor: FC = () => {
           ))}
         </select>
       </div>
-      <table className="select-none border-2 border-solid [&_th]:border [&_th]:bg-slate-200 ">
-        <thead className="border-b-2">
+      <table className="select-none border-2 border-solid [&_th]:bg-slate-200">
+        <thead className="">
           <Row>
             <VHead />
             {[...Array(size)].map((_, col) => (
@@ -40,7 +40,7 @@ export const NonogramEditor: FC = () => {
               <HHead></HHead>
               {[...Array(size)].map((_, col) => (
                 <Cell key={col}>
-                  <CellButton></CellButton>
+                  <CellButton />
                 </Cell>
               ))}
             </Row>
