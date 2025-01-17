@@ -34,7 +34,9 @@ export const Nonogram: FC<Props> = ({ size, hints }) => {
           <Row key={row}>
             <HHead>
               {hints?.h.at(row)?.map((num, i) => (
-                <div key={i}>{num}</div>
+                <div key={i} className="w-4 text-center">
+                  {num}
+                </div>
               ))}
             </HHead>
             {[...Array(size)].map((_, col) => (
