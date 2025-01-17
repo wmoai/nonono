@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { NonogramEditor } from "../play/NonogramEditor";
+import { NonogramEditor } from "./NonogramEditor";
 
 const EditPage: FC = () => {
   return (
