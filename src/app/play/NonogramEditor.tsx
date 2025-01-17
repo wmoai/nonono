@@ -2,11 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { Cell } from "./Cell";
-import { CellButton } from "./CellButton";
-import { HHead } from "./HHead";
-import { Row } from "./Row";
-import { VHead } from "./VHead";
+import { Nonogram } from "./Nonogram";
 
 const sizes = [5, 10, 15, 20];
 
@@ -25,28 +21,19 @@ export const NonogramEditor: FC = () => {
           ))}
         </select>
       </div>
-      <table className="select-none border-2 border-solid [&_th]:bg-slate-200">
-        <thead className="">
-          <Row>
-            <VHead />
-            {[...Array(size)].map((_, col) => (
-              <VHead key={col}></VHead>
-            ))}
-          </Row>
-        </thead>
-        <tbody>
-          {[...Array(size)].map((_, row) => (
-            <Row key={row}>
-              <HHead></HHead>
-              {[...Array(size)].map((_, col) => (
-                <Cell key={col}>
-                  <CellButton />
-                </Cell>
-              ))}
-            </Row>
-          ))}
-        </tbody>
-      </table>
+      <Nonogram
+        size={size}
+        hints={{
+          h: [
+            [1, 11],
+            [1, 1, 1],
+          ],
+          v: [
+            [1, 11],
+            [1, 1, 1],
+          ],
+        }}
+      />
     </div>
   );
 };
