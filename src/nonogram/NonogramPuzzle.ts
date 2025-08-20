@@ -1,24 +1,25 @@
-type Cell = "o" | "x" | null;
+export type NonogramCell = "o" | "x" | null;
 
 export type NonogramHint = {
   row: number[][];
   col: number[][];
 };
-type Size = 5 | 10 | 15;
+export const nonogramSizes = [10, 15, 20] as const;
+export type NonogramSize = (typeof nonogramSizes)[number];
 
 export class NonogramPuzzle {
-  readonly size: 5 | 10 | 15;
+  readonly size: NonogramSize;
   readonly hint: NonogramHint;
-  private readonly grid: Cell[][];
+  readonly grid: NonogramCell[][];
 
   constructor({
     size,
     hint,
     grid,
   }: {
-    size: Size;
+    size: NonogramSize;
     hint: NonogramHint;
-    grid: Cell[][];
+    grid: NonogramCell[][];
   }) {
     this.size = size;
     this.grid = grid;
@@ -26,21 +27,53 @@ export class NonogramPuzzle {
   }
 
   static createPuzzle(hint: NonogramHint) {
-    const size = hint.row.length as Size;
-    const grid = Array(size).fill(Array(size).fill(null));
+    const size = hint.row.length as NonogramSize;
+    const grid = [...Array(size)].map(() => [...Array(size)].map(() => null));
     return new NonogramPuzzle({ size, hint, grid });
   }
 
-  static createBlank(size: Size) {
+  static createBlank(size: NonogramSize) {
     const hint = {
       row: Array(size).fill([0]),
       col: Array(size).fill([0]),
     };
-    const grid = Array(size).fill(Array(size).fill(null));
+    const grid = [...Array(size)].map(() => [...Array(size)].map(() => null));
     return new NonogramPuzzle({ size, hint, grid });
   }
 
-  setCell({ x, y, cell }: { x: number; y: number; cell: Cell }) {
+  private clone() {
+    return new NonogramPuzzle({
+      ...this,
+    });
+  }
+
+  setCell({ x, y, cell }: { x: number; y: number; cell: NonogramCell }) {
     this.grid[y][x] = cell;
+    return this.clone();
+  }
+
+  updateHintByGrid() {
+    // 行ヒント
+    this.hint.row = this.grid.map((row) => lineToHint(row));
+    // 列ヒント
+    const cols = [...Array(this.size)].map((_, index) =>
+      this.grid.map((row) => row[index])
+    );
+    this.hint.col = cols.map((col) => lineToHint(col));
+    return this.clone();
   }
 }
+
+const lineToHint = (line: NonogramCell[]): number[] => {
+  const result: number[] = [];
+  let count = 0;
+  line.forEach((cell) => {
+    if (cell === "o") {
+      count++;
+    } else if (count > 0) {
+      result.push(count);
+      count = 0;
+    }
+  });
+  return result.length === 0 ? [0] : result;
+};

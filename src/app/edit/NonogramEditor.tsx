@@ -2,21 +2,27 @@
 
 import { ChangeEventHandler, FC, useCallback, useState } from "react";
 
-import { NonogramUI } from "./NonogramUI";
-import { Cell as CellType, Nonogram } from "./nonogram";
+import {
+  NonogramCell,
+  NonogramPuzzle,
+  NonogramSize,
+  nonogramSizes,
+} from "@/nonogram/NonogramPuzzle";
 
-const sizes = [10, 15, 20];
+import { NonogramUI } from "./NonogramUI";
 
 export const NonogramEditor: FC = () => {
-  const [size, setSize] = useState(sizes[2]);
-  const [nonogram, setNonogram] = useState<Nonogram>(Nonogram.fromSize(size));
-  const [drawState, setDrawState] = useState<CellType["state"]>(null);
+  const [size, setSize] = useState<NonogramSize>(nonogramSizes[1]);
+  const [puzzle, setPuzzle] = useState<NonogramPuzzle>(
+    NonogramPuzzle.createBlank(size)
+  );
+  const [drawCell, setDrawCell] = useState<NonogramCell>(null);
 
   const handleChangeSize: ChangeEventHandler<HTMLSelectElement> = useCallback(
     (e) => {
-      const size = Number(e.target.value);
+      const size = Number(e.target.value) as NonogramSize;
       setSize(size);
-      setNonogram(Nonogram.fromSize(size));
+      setPuzzle(NonogramPuzzle.createBlank(size));
     },
     []
   );
@@ -26,7 +32,7 @@ export const NonogramEditor: FC = () => {
       <div>
         size:
         <select value={size} onChange={handleChangeSize}>
-          {sizes.map((value) => (
+          {nonogramSizes.map((value) => (
             <option value={value} key={value}>
               {value}
             </option>
@@ -34,16 +40,16 @@ export const NonogramEditor: FC = () => {
         </select>
       </div>
       <NonogramUI
-        size={size}
-        hints={nonogram.hints}
-        board={nonogram.board}
-        onPushStart={(cell) => {
-          const state = cell.state === "o" ? null : "o";
-          setNonogram(nonogram.setCell(cell.x, cell.y, state));
-          setDrawState(state);
+        puzzle={puzzle}
+        onPushStart={({ x, y, cell }) => {
+          const newCell = cell === "o" ? null : "o";
+          setPuzzle(puzzle.setCell({ x, y, cell: newCell }).updateHintByGrid());
+          setDrawCell(newCell);
         }}
-        onPushMove={(cell) => {
-          setNonogram(nonogram.setCell(cell.x, cell.y, drawState));
+        onPushMove={({ x, y }) => {
+          setPuzzle(
+            puzzle.setCell({ x, y, cell: drawCell }).updateHintByGrid()
+          );
         }}
       />
     </div>

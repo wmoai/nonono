@@ -1,17 +1,18 @@
 import { FC } from "react";
 
+import { NonogramCell } from "@/nonogram/NonogramPuzzle";
+
 import { VBorder } from "./VBorder";
-import { Cell as CellType } from "./nonogram";
 
 type Props = {
-  state?: CellType["state"];
+  cell: NonogramCell;
   onPointerDown?: () => void;
   onPointerOver?: () => void;
   onPointerUp?: () => void;
 };
 
 export const Cell: FC<Props> = ({
-  state,
+  cell,
   onPointerDown,
   onPointerOver,
   onPointerUp,
@@ -27,8 +28,8 @@ export const Cell: FC<Props> = ({
           onPointerMove={onPointerOver}
           onPointerUp={onPointerUp}
         >
-          {state === "o" && <div className="absolute inset-0 bg-mark" />}
-          {state === "x" && (
+          {cell === "o" && <div className="absolute inset-0 bg-mark" />}
+          {cell === "x" && (
             <div className="[&>*]:absolute [&>*]:inset-x-0 [&>*]:h-px [&>*]:bg-mark">
               <div className="skew-y-[-45deg]" />
               <div className="skew-y-[45deg]" />

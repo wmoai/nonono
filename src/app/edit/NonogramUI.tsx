@@ -1,24 +1,27 @@
 import { FC, useState } from "react";
 
+import { NonogramCell, NonogramPuzzle } from "@/nonogram/NonogramPuzzle";
+
 import { Cell } from "./Cell";
 import { HHead } from "./HHead";
 import { Row } from "./Row";
 import { VHead } from "./VHead";
-import { Nonogram, Cell as CellType } from "./nonogram";
+
+type PositionCell = {
+  x: number;
+  y: number;
+  cell: NonogramCell;
+};
 
 type Props = {
-  size: number;
-  hints?: Nonogram["hints"];
-  board: Nonogram["board"];
-  onPushStart?: (cell: CellType) => void;
-  onPushMove?: (cell: CellType) => void;
-  onPushEnd?: (cell?: CellType) => void;
+  puzzle: NonogramPuzzle;
+  onPushStart?: (args: PositionCell) => void;
+  onPushMove?: (args: PositionCell) => void;
+  onPushEnd?: (args?: PositionCell) => void;
 };
 
 export const NonogramUI: FC<Props> = ({
-  size,
-  hints,
-  board,
+  puzzle,
   onPushStart,
   onPushEnd,
   onPushMove,
@@ -38,9 +41,9 @@ export const NonogramUI: FC<Props> = ({
       <thead className="">
         <Row>
           <VHead />
-          {[...Array(size)].map((_, col) => (
+          {[...Array(puzzle.size)].map((_, col) => (
             <VHead key={col}>
-              {hints?.v.at(col)?.map((num, i) => (
+              {puzzle.hint.col.at(col)?.map((num, i) => (
                 <div key={i}>{num}</div>
               ))}
             </VHead>
@@ -48,38 +51,38 @@ export const NonogramUI: FC<Props> = ({
         </Row>
       </thead>
       <tbody>
-        {[...Array(size)].map((_, row) => (
+        {[...Array(puzzle.size)].map((_, row) => (
           <Row key={row}>
             <HHead>
-              {hints?.h.at(row)?.map((num, i) => (
+              {puzzle.hint.row.at(row)?.map((num, i) => (
                 <div key={i} className="w-3.5 text-center">
                   {num}
                 </div>
               ))}
             </HHead>
-            {[...Array(size)].map((_, col) => {
-              const cellState = board.at(row)?.at(col);
-              const cell = {
-                x: row,
-                y: col,
-                state: cellState ?? null,
+            {[...Array(puzzle.size)].map((_, col) => {
+              const position = {
+                x: col,
+                y: row,
               };
+              const cell = puzzle.grid.at(row)?.at(col) ?? null;
+
               return (
                 <Cell
                   key={col}
-                  state={cellState}
+                  cell={cell}
                   onPointerDown={() => {
                     setIsPushing(true);
-                    onPushStart?.(cell);
+                    onPushStart?.({ ...position, cell });
                   }}
                   onPointerOver={() => {
                     if (isPushing) {
-                      onPushMove?.(cell);
+                      onPushMove?.({ ...position, cell });
                     }
                   }}
                   onPointerUp={() => {
                     setIsPushing(false);
-                    onPushEnd?.(cell);
+                    onPushEnd?.({ ...position, cell });
                   }}
                 />
               );
