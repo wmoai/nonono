@@ -75,5 +75,8 @@ const lineToHint = (line: NonogramCell[]): number[] => {
       count = 0;
     }
   });
+  if (count > 0) {
+    result.push(count);
+  }
   return result.length === 0 ? [0] : result;
 };
