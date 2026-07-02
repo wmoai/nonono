@@ -41,7 +41,6 @@ const isConsistent = (
   grid: Grid,
   rowIndex: number,
   pattern: Pattern,
-  colHints: number[][]
 ): boolean => {
   for (let col = 0; col < pattern.length; col++) {
     const val = pattern[col];
@@ -122,7 +121,7 @@ export const solveNonogram = (
 
     for (const pattern of rowCandidates[rowIndex]) {
       console.log(rowIndex, grid);
-      if (!isConsistent(grid, rowIndex, pattern, colHints)) {
+      if (!isConsistent(grid, rowIndex, pattern)) {
         console.log("not");
         continue;
       }
