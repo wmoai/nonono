@@ -30,9 +30,9 @@ export const Cell: FC<Props> = ({
         >
           {cell === "o" && <div className="absolute inset-0 bg-mark" />}
           {cell === "x" && (
-            <div className="[&>*]:absolute [&>*]:inset-x-0 [&>*]:h-px [&>*]:bg-mark">
+            <div className="*:absolute *:inset-x-0 *:h-px *:bg-mark">
               <div className="skew-y-[-45deg]" />
-              <div className="skew-y-[45deg]" />
+              <div className="skew-y-45" />
             </div>
           )}
         </button>

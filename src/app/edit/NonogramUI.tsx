@@ -30,7 +30,7 @@ export const NonogramUI: FC<Props> = ({
 
   return (
     <table
-      className="select-none border-2 border-solid [&_th]:bg-slate-200 [&_th]:font-normal"
+      className="border-2 border-solid select-none [&_th]:bg-slate-200 [&_th]:font-normal"
       onPointerLeave={() => {
         if (isPushing) {
           setIsPushing(false);
