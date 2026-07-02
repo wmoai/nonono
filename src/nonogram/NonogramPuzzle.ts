@@ -56,9 +56,7 @@ export class NonogramPuzzle {
     // 行ヒント
     this.hint.row = this.grid.map((row) => lineToHint(row));
     // 列ヒント
-    const cols = [...Array(this.size)].map((_, index) =>
-      this.grid.map((row) => row[index])
-    );
+    const cols = [...Array(this.size)].map((_, index) => this.grid.map((row) => row[index]));
     this.hint.col = cols.map((col) => lineToHint(col));
     return this.clone();
   }

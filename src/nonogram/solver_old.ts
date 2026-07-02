@@ -21,7 +21,7 @@ const generateRowPatterns = (hint: number[], length: number): Pattern[] => {
       // 現在位置に blockSize 個の黒を置く
       const newRow = row.concat(
         Array(start - row.length).fill(0), // 白マスで埋める
-        Array(blockSize).fill(1) // 黒マス
+        Array(blockSize).fill(1), // 黒マス
       );
       if (newRow.length < length) {
         newRow.push(0); // 次のブロックのために最低1つ白を入れる
@@ -37,11 +37,7 @@ const generateRowPatterns = (hint: number[], length: number): Pattern[] => {
 /**
  * 行を追加したときに列が矛盾しないか確認
  */
-const isConsistent = (
-  grid: Grid,
-  rowIndex: number,
-  pattern: Pattern,
-): boolean => {
+const isConsistent = (grid: Grid, rowIndex: number, pattern: Pattern): boolean => {
   for (let col = 0; col < pattern.length; col++) {
     const val = pattern[col];
     if (grid[rowIndex][col] !== null && grid[rowIndex][col] !== val) {
@@ -90,21 +86,14 @@ const checkColumns = (grid: Grid, colHints: number[][]): boolean => {
  * ノノグラムソルバー
  * @returns "解なし" | "一意解" | "複数解"
  */
-export const solveNonogram = (
-  rowHints: number[][],
-  colHints: number[][]
-): string => {
+export const solveNonogram = (rowHints: number[][], colHints: number[][]): string => {
   const nRows = rowHints.length;
   const nCols = colHints.length;
 
-  const rowCandidates = rowHints.map((hint) =>
-    generateRowPatterns(hint, nCols)
-  );
+  const rowCandidates = rowHints.map((hint) => generateRowPatterns(hint, nCols));
   console.log(rowCandidates);
 
-  const grid: Grid = Array.from({ length: nRows }, () =>
-    Array(nCols).fill(null)
-  );
+  const grid: Grid = Array.from({ length: nRows }, () => Array(nCols).fill(null));
 
   let solutionCount = 0;
 

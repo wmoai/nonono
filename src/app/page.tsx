@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-(family-name:--font-geist-sans) sm:p-20">
+    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[--font-geist-sans] sm:p-20">
       <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
         <Link href="/play">play</Link>
         <Link href="edit">edit</Link>
@@ -15,7 +15,7 @@ export default function Home() {
           height={38}
           priority
         />
-        <ol className="list-inside list-decimal text-center font-(family-name:--font-geist-mono) text-sm sm:text-left">
+        <ol className="list-inside list-decimal text-center font-[--font-geist-mono] text-sm sm:text-left">
           <li className="mb-2">
             Get started by editing{" "}
             <code className="rounded-sm bg-black/5 px-1 py-0.5 font-semibold dark:bg-white/6">
@@ -59,13 +59,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
           Learn
         </a>
         <a
@@ -74,13 +68,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
           Examples
         </a>
         <a
@@ -89,13 +77,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
           Go to nextjs.org →
         </a>
       </footer>

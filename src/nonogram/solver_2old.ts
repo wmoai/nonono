@@ -53,9 +53,7 @@ class NonogramSolver {
         this.solutionCount++;
         if (this.solutionCount === 1) {
           // 最初の解を保存
-          this.firstSolution = this.grid.map((row) =>
-            row.map((cell) => cell === true)
-          );
+          this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
         }
       }
       return;

@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "nextjs"],
+  "categories": {
+    "correctness": "error"
+  },
+  "jsPlugins": ["oxlint-tailwindcss"],
+  "settings": {
+    "tailwindcss": {
+      "entryPoint": "src/app/globals.css"
+    }
+  },
+  "rules": {
+    "tailwindcss/no-unknown-classes": "error",
+    "tailwindcss/no-conflicting-classes": "error",
+    "tailwindcss/enforce-sort-order": "warn"
+  },
+  "env": {
+    "builtin": true
+  }
+}

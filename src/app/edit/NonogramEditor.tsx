@@ -13,19 +13,14 @@ import { NonogramUI } from "./NonogramUI";
 
 export const NonogramEditor: FC = () => {
   const [size, setSize] = useState<NonogramSize>(nonogramSizes[1]);
-  const [puzzle, setPuzzle] = useState<NonogramPuzzle>(
-    NonogramPuzzle.createBlank(size)
-  );
+  const [puzzle, setPuzzle] = useState<NonogramPuzzle>(NonogramPuzzle.createBlank(size));
   const [drawCell, setDrawCell] = useState<NonogramCell>(null);
 
-  const handleChangeSize: ChangeEventHandler<HTMLSelectElement> = useCallback(
-    (e) => {
-      const size = Number(e.target.value) as NonogramSize;
-      setSize(size);
-      setPuzzle(NonogramPuzzle.createBlank(size));
-    },
-    []
-  );
+  const handleChangeSize: ChangeEventHandler<HTMLSelectElement> = useCallback((e) => {
+    const size = Number(e.target.value) as NonogramSize;
+    setSize(size);
+    setPuzzle(NonogramPuzzle.createBlank(size));
+  }, []);
 
   return (
     <div>
@@ -47,9 +42,7 @@ export const NonogramEditor: FC = () => {
           setDrawCell(newCell);
         }}
         onPushMove={({ x, y }) => {
-          setPuzzle(
-            puzzle.setCell({ x, y, cell: drawCell }).updateHintByGrid()
-          );
+          setPuzzle(puzzle.setCell({ x, y, cell: drawCell }).updateHintByGrid());
         }}
       />
     </div>

@@ -11,12 +11,7 @@ type Props = {
   onPointerUp?: () => void;
 };
 
-export const Cell: FC<Props> = ({
-  cell,
-  onPointerDown,
-  onPointerOver,
-  onPointerUp,
-}) => {
+export const Cell: FC<Props> = ({ cell, onPointerDown, onPointerOver, onPointerUp }) => {
   return (
     <td className="group relative p-0">
       <VBorder />

@@ -52,9 +52,7 @@ class NonogramSolver {
       // 全て論理的に確定した場合
       if (this.isValidSolution()) {
         this.solutionCount = 1;
-        this.firstSolution = this.grid.map((row) =>
-          row.map((cell) => cell === true)
-        );
+        this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
       }
     }
 
@@ -80,7 +78,7 @@ class NonogramSolver {
       for (let row = 0; row < this.rowCount; row++) {
         const newPattern = this.deduceLinePattern(
           this.grid[row],
-          this.normalizeHints(this.rowHints[row])
+          this.normalizeHints(this.rowHints[row]),
         );
 
         if (this.applyPattern(row, -1, newPattern.pattern)) {
@@ -91,10 +89,7 @@ class NonogramSolver {
       // 各列を処理
       for (let col = 0; col < this.colCount; col++) {
         const column = this.grid.map((row) => row[col]);
-        const newPattern = this.deduceLinePattern(
-          column,
-          this.normalizeHints(this.colHints[col])
-        );
+        const newPattern = this.deduceLinePattern(column, this.normalizeHints(this.colHints[col]));
 
         if (this.applyPattern(-1, col, newPattern.pattern)) {
           changed = true;
@@ -104,10 +99,7 @@ class NonogramSolver {
   }
 
   // 一行（または一列）に対する論理的推論
-  private deduceLinePattern(
-    currentLine: (boolean | null)[],
-    hints: number[]
-  ): LinePattern {
+  private deduceLinePattern(currentLine: (boolean | null)[], hints: number[]): LinePattern {
     const length = currentLine.length;
 
     // 全ての可能な配置を生成
@@ -115,7 +107,7 @@ class NonogramSolver {
 
     // 現在の状態と矛盾しない配置のみを抽出
     const compatiblePatterns = validPatterns.filter((pattern) =>
-      this.isPatternCompatible(pattern, currentLine)
+      this.isPatternCompatible(pattern, currentLine),
     );
 
     if (compatiblePatterns.length === 0) {
@@ -160,14 +152,11 @@ class NonogramSolver {
     hints: number[],
     hintIndex: number,
     currentPattern: boolean[],
-    allPatterns: boolean[][]
+    allPatterns: boolean[][],
   ): void {
     if (hintIndex === hints.length) {
       // 全てのヒントを配置完了
-      const pattern = [
-        ...currentPattern,
-        ...Array(length - currentPattern.length).fill(false),
-      ];
+      const pattern = [...currentPattern, ...Array(length - currentPattern.length).fill(false)];
       allPatterns.push(pattern);
       return;
     }
@@ -175,15 +164,10 @@ class NonogramSolver {
     const blockSize = hints[hintIndex];
     const remainingHints = hints.slice(hintIndex + 1);
     const minSpaceNeeded =
-      remainingHints.reduce((sum, size) => sum + size, 0) +
-      remainingHints.length;
+      remainingHints.reduce((sum, size) => sum + size, 0) + remainingHints.length;
     const maxStartPos = length - blockSize - minSpaceNeeded;
 
-    for (
-      let startPos = currentPattern.length;
-      startPos <= maxStartPos;
-      startPos++
-    ) {
+    for (let startPos = currentPattern.length; startPos <= maxStartPos; startPos++) {
       const newPattern = [...currentPattern];
 
       // 空白を追加
@@ -201,32 +185,17 @@ class NonogramSolver {
         newPattern.push(false);
       }
 
-      this.generatePatternsRecursive(
-        length,
-        hints,
-        hintIndex + 1,
-        newPattern,
-        allPatterns
-      );
+      this.generatePatternsRecursive(length, hints, hintIndex + 1, newPattern, allPatterns);
     }
   }
 
   // パターンが現在の状態と矛盾しないかチェック
-  private isPatternCompatible(
-    pattern: boolean[],
-    currentLine: (boolean | null)[]
-  ): boolean {
-    return pattern.every(
-      (val, i) => currentLine[i] === null || currentLine[i] === val
-    );
+  private isPatternCompatible(pattern: boolean[], currentLine: (boolean | null)[]): boolean {
+    return pattern.every((val, i) => currentLine[i] === null || currentLine[i] === val);
   }
 
   // パターンをグリッドに適用
-  private applyPattern(
-    row: number,
-    col: number,
-    pattern: (boolean | null)[]
-  ): boolean {
+  private applyPattern(row: number, col: number, pattern: (boolean | null)[]): boolean {
     let changed = false;
 
     if (row >= 0) {
@@ -277,9 +246,7 @@ class NonogramSolver {
       if (this.isValidSolution()) {
         this.solutionCount++;
         if (this.solutionCount === 1) {
-          this.firstSolution = this.grid.map((row) =>
-            row.map((cell) => cell === true)
-          );
+          this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
         }
       }
       return;
@@ -312,7 +279,7 @@ class NonogramSolver {
   // 指定位置以降の次の未確定セルを探す
   private findNextUnknownCell(
     startRow: number,
-    startCol: number
+    startCol: number,
   ): { row: number; col: number } | null {
     for (let row = startRow; row < this.rowCount; row++) {
       const colStart = row === startRow ? startCol : 0;
@@ -348,9 +315,7 @@ class NonogramSolver {
 
     // 部分的な場合は、現在の状態が有効な配置の一部になりうるかチェック
     const validPatterns = this.generateValidPatterns(this.colCount, hints);
-    return validPatterns.some((pattern) =>
-      this.isPatternCompatible(pattern, line)
-    );
+    return validPatterns.some((pattern) => this.isPatternCompatible(pattern, line));
   }
 
   // 列の部分的な妥当性チェック
@@ -365,9 +330,7 @@ class NonogramSolver {
 
     // 部分的な場合は、現在の状態が有効な配置の一部になりうるかチェック
     const validPatterns = this.generateValidPatterns(this.rowCount, hints);
-    return validPatterns.some((pattern) =>
-      this.isPatternCompatible(pattern, line)
-    );
+    return validPatterns.some((pattern) => this.isPatternCompatible(pattern, line));
   }
 
   // 完全な解の妥当性チェック
@@ -452,11 +415,7 @@ class NonogramSolver {
   public printCurrentGrid(): void {
     console.log("現在のグリッド状態:");
     for (const row of this.grid) {
-      console.log(
-        row
-          .map((cell) => (cell === true ? "■" : cell === false ? "□" : "?"))
-          .join("")
-      );
+      console.log(row.map((cell) => (cell === true ? "■" : cell === false ? "□" : "?")).join(""));
     }
   }
 }

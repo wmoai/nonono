@@ -20,12 +20,7 @@ type Props = {
   onPushEnd?: (args?: PositionCell) => void;
 };
 
-export const NonogramUI: FC<Props> = ({
-  puzzle,
-  onPushStart,
-  onPushEnd,
-  onPushMove,
-}) => {
+export const NonogramUI: FC<Props> = ({ puzzle, onPushStart, onPushEnd, onPushMove }) => {
   const [isPushing, setIsPushing] = useState(false);
 
   return (
