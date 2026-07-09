@@ -23,6 +23,13 @@
 
 運営による出題ではなく、ユーザーが作問してURLで共有する形をメインとする。ただし「新着問題」をサイトに一覧表示するため、新着100件程度を記録する軽量なバックエンド(KV等)は導入する。
 
+### 画面構成とルーティング
+
+- `/` — トップ、新着問題のインデックス
+- `/puzzles/[data-string]` — 問題回答。`data-string`はlz-stringの`compressToEncodedURIComponent`でエンコードした盤面データ
+- `/puzzles/new` — 問題作成
+- `/mypage` — 直近にプレイした問題の進捗1件と、自分で投稿した問題一覧（どちらもlocalStorageに保持）
+
 ### ホスティング
 
 **Vercel** を採用する。Next.js公式プラットフォームであり追加設定なしにApp Router全機能が動く。新着一覧用のKVもVercel Marketplace経由のUpstash Redis連携の無料枠で賄う。
