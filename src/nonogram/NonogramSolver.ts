@@ -1,3 +1,5 @@
+import { solveLine } from "./lineSolver";
+
 interface NonogramPuzzle {
   rowHints: number[][];
   colHints: number[][];
@@ -8,11 +10,6 @@ interface SolutionResult {
   solutionCount: number;
   solution: boolean[][] | null;
   logicallyDetermined?: number; // 論理的に確定したセルの数
-}
-
-interface LinePattern {
-  pattern: (boolean | null)[];
-  isComplete: boolean;
 }
 
 class NonogramSolver {
@@ -41,18 +38,13 @@ class NonogramSolver {
     this.firstSolution = null;
     this.logicallyDeterminedCount = 0;
 
-    // 論理的推論による初期確定
-    this.performLogicalDeduction();
-
-    // 残りの未確定セルをバックトラッキングで探索
-    const firstUnknown = this.findFirstUnknownCell();
-    if (firstUnknown) {
-      this.backtrack(firstUnknown.row, firstUnknown.col);
-    } else {
-      // 全て論理的に確定した場合
-      if (this.isValidSolution()) {
-        this.solutionCount = 1;
-        this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
+    // 論理的推論による初期確定。矛盾があれば探索するまでもなく解なし
+    if (this.propagate()) {
+      const firstUnknown = this.findFirstUnknownCell();
+      if (firstUnknown) {
+        this.backtrack(firstUnknown.row, firstUnknown.col);
+      } else {
+        this.recordSolutionIfValid();
       }
     }
 
@@ -64,8 +56,8 @@ class NonogramSolver {
     };
   }
 
-  // 論理的推論による確定処理
-  private performLogicalDeduction(): void {
+  // 論理的推論による確定処理。行/列のいずれかが矛盾したら false を返す
+  private propagate(): boolean {
     let changed = true;
     let iterations = 0;
     const maxIterations = 100; // 無限ループ防止
@@ -76,12 +68,13 @@ class NonogramSolver {
 
       // 各行を処理
       for (let row = 0; row < this.rowCount; row++) {
-        const newPattern = this.deduceLinePattern(
+        const { pattern, feasible } = solveLine(
           this.grid[row],
           this.normalizeHints(this.rowHints[row]),
         );
+        if (!feasible) return false;
 
-        if (this.applyPattern(row, -1, newPattern.pattern)) {
+        if (this.applyPattern(row, -1, pattern)) {
           changed = true;
         }
       }
@@ -89,109 +82,16 @@ class NonogramSolver {
       // 各列を処理
       for (let col = 0; col < this.colCount; col++) {
         const column = this.grid.map((row) => row[col]);
-        const newPattern = this.deduceLinePattern(column, this.normalizeHints(this.colHints[col]));
+        const { pattern, feasible } = solveLine(column, this.normalizeHints(this.colHints[col]));
+        if (!feasible) return false;
 
-        if (this.applyPattern(-1, col, newPattern.pattern)) {
+        if (this.applyPattern(-1, col, pattern)) {
           changed = true;
         }
       }
     }
-  }
 
-  // 一行（または一列）に対する論理的推論
-  private deduceLinePattern(currentLine: (boolean | null)[], hints: number[]): LinePattern {
-    const length = currentLine.length;
-
-    // 全ての可能な配置を生成
-    const validPatterns = this.generateValidPatterns(length, hints);
-
-    // 現在の状態と矛盾しない配置のみを抽出
-    const compatiblePatterns = validPatterns.filter((pattern) =>
-      this.isPatternCompatible(pattern, currentLine),
-    );
-
-    if (compatiblePatterns.length === 0) {
-      // 矛盾している場合（通常は発生しない）
-      return { pattern: currentLine, isComplete: false };
-    }
-
-    // 全ての互換性のある配置で共通して確定している部分を抽出
-    const deducedPattern: (boolean | null)[] = Array(length).fill(null);
-
-    for (let i = 0; i < length; i++) {
-      const values = compatiblePatterns.map((pattern) => pattern[i]);
-      const allSame = values.every((val) => val === values[0]);
-
-      if (allSame) {
-        deducedPattern[i] = values[0];
-      } else {
-        deducedPattern[i] = currentLine[i]; // 既存の値を保持
-      }
-    }
-
-    return {
-      pattern: deducedPattern,
-      isComplete: compatiblePatterns.length === 1,
-    };
-  }
-
-  // 指定された長さとヒントに対する全ての有効な配置を生成
-  private generateValidPatterns(length: number, hints: number[]): boolean[][] {
-    if (hints.length === 0) {
-      return [Array(length).fill(false)];
-    }
-
-    const patterns: boolean[][] = [];
-    this.generatePatternsRecursive(length, hints, 0, [], patterns);
-    return patterns;
-  }
-
-  // 再帰的にパターンを生成
-  private generatePatternsRecursive(
-    length: number,
-    hints: number[],
-    hintIndex: number,
-    currentPattern: boolean[],
-    allPatterns: boolean[][],
-  ): void {
-    if (hintIndex === hints.length) {
-      // 全てのヒントを配置完了
-      const pattern = [...currentPattern, ...Array(length - currentPattern.length).fill(false)];
-      allPatterns.push(pattern);
-      return;
-    }
-
-    const blockSize = hints[hintIndex];
-    const remainingHints = hints.slice(hintIndex + 1);
-    const minSpaceNeeded =
-      remainingHints.reduce((sum, size) => sum + size, 0) + remainingHints.length;
-    const maxStartPos = length - blockSize - minSpaceNeeded;
-
-    for (let startPos = currentPattern.length; startPos <= maxStartPos; startPos++) {
-      const newPattern = [...currentPattern];
-
-      // 空白を追加
-      while (newPattern.length < startPos) {
-        newPattern.push(false);
-      }
-
-      // ブロックを追加
-      for (let i = 0; i < blockSize; i++) {
-        newPattern.push(true);
-      }
-
-      // 次のブロックとの間に最低1つの空白を確保（最後のブロックでなければ）
-      if (hintIndex < hints.length - 1) {
-        newPattern.push(false);
-      }
-
-      this.generatePatternsRecursive(length, hints, hintIndex + 1, newPattern, allPatterns);
-    }
-  }
-
-  // パターンが現在の状態と矛盾しないかチェック
-  private isPatternCompatible(pattern: boolean[], currentLine: (boolean | null)[]): boolean {
-    return pattern.every((val, i) => currentLine[i] === null || currentLine[i] === val);
+    return true;
   }
 
   // パターンをグリッドに適用
@@ -233,7 +133,7 @@ class NonogramSolver {
     return null;
   }
 
-  // バックトラッキング実装（改良版）
+  // バックトラッキング実装。1マス仮決定するたびに伝播で波及的に確定・矛盾検出する
   private backtrack(row: number, col: number): void {
     // 2つ以上解が見つかったら早期終了
     if (this.solutionCount >= 2) return;
@@ -242,38 +142,55 @@ class NonogramSolver {
     const nextUnknown = this.findNextUnknownCell(row, col);
 
     if (!nextUnknown) {
-      // 全セル確定、解をチェック
-      if (this.isValidSolution()) {
-        this.solutionCount++;
-        if (this.solutionCount === 1) {
-          this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
-        }
-      }
+      this.recordSolutionIfValid();
       return;
     }
 
     const { row: nextRow, col: nextCol } = nextUnknown;
 
-    // セルを黒（true）にする場合を試行
-    this.grid[nextRow][nextCol] = true;
-    if (this.isValidPartial(nextRow, nextCol)) {
-      this.backtrack(nextRow, nextCol);
-    }
+    for (const value of [true, false]) {
+      if (this.solutionCount >= 2) return;
 
-    // 2つ以上解が見つかったら早期終了
-    if (this.solutionCount >= 2) {
-      this.grid[nextRow][nextCol] = null;
-      return;
-    }
+      const wasNull = this.snapshotNullCells();
+      this.grid[nextRow][nextCol] = value;
 
-    // セルを白（false）にする場合を試行
-    this.grid[nextRow][nextCol] = false;
-    if (this.isValidPartial(nextRow, nextCol)) {
-      this.backtrack(nextRow, nextCol);
-    }
+      if (this.propagate()) {
+        const filled = this.findFirstUnknownCell();
+        if (filled) {
+          this.backtrack(filled.row, filled.col);
+        } else {
+          this.recordSolutionIfValid();
+        }
+      }
 
-    // バックトラック
-    this.grid[nextRow][nextCol] = null;
+      this.restoreNullCells(wasNull);
+    }
+  }
+
+  // 解として確定した場合にカウント・記録する
+  private recordSolutionIfValid(): void {
+    if (this.isValidSolution()) {
+      this.solutionCount++;
+      if (this.solutionCount === 1) {
+        this.firstSolution = this.grid.map((row) => row.map((cell) => cell === true));
+      }
+    }
+  }
+
+  // 未確定セルのスナップショットを取る（伝播で新たに確定したセルのアンドゥ用）
+  private snapshotNullCells(): boolean[][] {
+    return this.grid.map((row) => row.map((cell) => cell === null));
+  }
+
+  // スナップショット時点で未確定だったセルのみ null に戻す
+  private restoreNullCells(wasNull: boolean[][]): void {
+    for (let row = 0; row < this.rowCount; row++) {
+      for (let col = 0; col < this.colCount; col++) {
+        if (wasNull[row][col]) {
+          this.grid[row][col] = null;
+        }
+      }
+    }
   }
 
   // 指定位置以降の次の未確定セルを探す
@@ -290,47 +207,6 @@ class NonogramSolver {
       }
     }
     return null;
-  }
-
-  // 部分的な状態での妥当性チェック
-  private isValidPartial(row: number, col: number): boolean {
-    // 現在の行の妥当性をチェック（部分的な場合も考慮）
-    if (!this.isRowPartiallyValid(row)) return false;
-
-    // 現在の列の妥当性をチェック（部分的な場合も考慮）
-    if (!this.isColPartiallyValid(col)) return false;
-
-    return true;
-  }
-
-  // 行の部分的な妥当性チェック
-  private isRowPartiallyValid(row: number): boolean {
-    const line = this.grid[row];
-    const hints = this.normalizeHints(this.rowHints[row]);
-
-    // 行が完全に確定している場合は完全チェック
-    if (line.every((cell) => cell !== null)) {
-      return this.isRowValid(row);
-    }
-
-    // 部分的な場合は、現在の状態が有効な配置の一部になりうるかチェック
-    const validPatterns = this.generateValidPatterns(this.colCount, hints);
-    return validPatterns.some((pattern) => this.isPatternCompatible(pattern, line));
-  }
-
-  // 列の部分的な妥当性チェック
-  private isColPartiallyValid(col: number): boolean {
-    const line = this.grid.map((row) => row[col]);
-    const hints = this.normalizeHints(this.colHints[col]);
-
-    // 列が完全に確定している場合は完全チェック
-    if (line.every((cell) => cell !== null)) {
-      return this.isColValid(col);
-    }
-
-    // 部分的な場合は、現在の状態が有効な配置の一部になりうるかチェック
-    const validPatterns = this.generateValidPatterns(this.rowCount, hints);
-    return validPatterns.some((pattern) => this.isPatternCompatible(pattern, line));
   }
 
   // 完全な解の妥当性チェック

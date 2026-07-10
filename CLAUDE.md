@@ -11,3 +11,7 @@ npm run lint      # ESLint
 npm run test:run  # テスト単発実行
 npm test          # テスト（watch モード）
 ```
+
+## ドキュメント
+
+- アーキテクチャ: `./docs/architecture.md`
