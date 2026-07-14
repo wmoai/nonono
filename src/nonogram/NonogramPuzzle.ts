@@ -41,24 +41,32 @@ export class NonogramPuzzle {
     return new NonogramPuzzle({ size, hint, grid });
   }
 
-  private clone() {
-    return new NonogramPuzzle({
-      ...this,
-    });
-  }
-
   setCell({ x, y, cell }: { x: number; y: number; cell: NonogramCell }) {
-    this.grid[y][x] = cell;
-    return this.clone();
+    const grid = this.grid.map((row, rowIndex) => {
+      if (rowIndex !== y) {
+        return row;
+      }
+      return row.map((current, colIndex) => {
+        if (colIndex !== x) {
+          return current;
+        }
+        return cell;
+      });
+    });
+    return new NonogramPuzzle({ size: this.size, hint: this.hint, grid });
   }
 
   updateHintByGrid() {
     // 行ヒント
-    this.hint.row = this.grid.map((row) => lineToHint(row.map(isBlackCell)));
+    const row = this.grid.map((line) => lineToHint(line.map(isBlackCell)));
     // 列ヒント
-    const cols = [...Array(this.size)].map((_, index) => this.grid.map((row) => row[index]));
-    this.hint.col = cols.map((col) => lineToHint(col.map(isBlackCell)));
-    return this.clone();
+    const cols = [...Array(this.size)].map((_, index) => this.grid.map((line) => line[index]));
+    const col = cols.map((line) => lineToHint(line.map(isBlackCell)));
+    return new NonogramPuzzle({ size: this.size, hint: { row, col }, grid: this.grid });
+  }
+
+  setGrid(grid: NonogramCell[][]) {
+    return new NonogramPuzzle({ size: this.size, hint: this.hint, grid }).updateHintByGrid();
   }
 }
 

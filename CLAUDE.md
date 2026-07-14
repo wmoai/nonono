@@ -7,7 +7,7 @@
 ```bash
 npm run dev       # 開発サーバー起動（Turbopack）
 npm run build     # プロダクションビルド
-npm run lint      # ESLint
+npm run lint      # リンター
 npm run test:run  # テスト単発実行
 npm test          # テスト（watch モード）
 ```
