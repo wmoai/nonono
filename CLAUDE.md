@@ -12,6 +12,10 @@ npm run test:run  # テスト単発実行
 npm test          # テスト（watch モード）
 ```
 
+## 原則
+
+- 質問に対して作業で返してはならない
+
 ## ドキュメント
 
 - アーキテクチャ: `./docs/architecture.md`
