@@ -98,7 +98,7 @@ export const solveNonogram = (rowHints: number[][], colHints: number[][]): strin
   let solutionCount = 0;
 
   const backtrack = (rowIndex: number) => {
-    if (solutionCount > 1) return; // 複数解判定で打ち切り
+    if (solutionCount > 1) {return;} // 複数解判定で打ち切り
 
     if (rowIndex === nRows) {
       if (checkColumns(grid, colHints)) {
@@ -121,8 +121,8 @@ export const solveNonogram = (rowHints: number[][], colHints: number[][]): strin
 
   backtrack(0);
 
-  if (solutionCount === 0) return "解なし";
-  if (solutionCount === 1) return "一意解";
+  if (solutionCount === 0) {return "解なし";}
+  if (solutionCount === 1) {return "一意解";}
   return "複数解";
 };
 

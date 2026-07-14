@@ -8,7 +8,7 @@ function canBeWhite(cell: boolean | null): boolean {
 
 function isBlockCompatible(line: (boolean | null)[], start: number, end: number): boolean {
   for (let pos = start; pos < end; pos++) {
-    if (!canBeBlack(line[pos])) return false;
+    if (!canBeBlack(line[pos])) {return false;}
   }
   return true;
 }
@@ -29,11 +29,11 @@ function isFeasible(line: (boolean | null)[], hints: number[]): boolean {
         continue;
       }
 
-      if (blockIndex === 0) continue;
+      if (blockIndex === 0) {continue;}
 
       const blockSize = hints[blockIndex - 1];
       const start = position - blockSize;
-      if (start < 0 || !isBlockCompatible(line, start, position)) continue;
+      if (start < 0 || !isBlockCompatible(line, start, position)) {continue;}
 
       if (blockIndex === 1) {
         dp[position][blockIndex] = dp[start][0];
@@ -68,13 +68,13 @@ export function solveLine(line: (boolean | null)[], hints: number[]): LineSolveR
   };
 
   const pattern = line.map((cell, index) => {
-    if (cell !== null) return cell;
+    if (cell !== null) {return cell;}
 
     const blackIsPossible = isPossibleAs(index, true);
     const whiteIsPossible = isPossibleAs(index, false);
 
-    if (blackIsPossible && !whiteIsPossible) return true;
-    if (!blackIsPossible && whiteIsPossible) return false;
+    if (blackIsPossible && !whiteIsPossible) {return true;}
+    if (!blackIsPossible && whiteIsPossible) {return false;}
     return null;
   });
 

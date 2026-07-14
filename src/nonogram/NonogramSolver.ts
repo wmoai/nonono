@@ -67,7 +67,7 @@ class NonogramSolver {
       const nextDirtyCols = new Set<number>();
       for (const row of rowsToProcess) {
         const { pattern, feasible } = solveLine(this.grid[row], this.normalizedRowHints[row]);
-        if (!feasible) return false;
+        if (!feasible) {return false;}
 
         this.applyPattern(row, -1, pattern, nextDirtyCols);
       }
@@ -76,7 +76,7 @@ class NonogramSolver {
       for (const col of colsToProcess) {
         const column = this.grid.map((row) => row[col]);
         const { pattern, feasible } = solveLine(column, this.normalizedColHints[col]);
-        if (!feasible) return false;
+        if (!feasible) {return false;}
 
         this.applyPattern(-1, col, pattern, nextDirtyRows);
       }
@@ -131,7 +131,7 @@ class NonogramSolver {
   // バックトラッキング実装。1マス仮決定するたびに伝播で波及的に確定・矛盾検出する
   private backtrack(row: number, col: number): void {
     // 2つ以上解が見つかったら早期終了
-    if (this.solutionCount >= 2) return;
+    if (this.solutionCount >= 2) {return;}
 
     // 次の未確定セルを探す
     const nextUnknown = this.findNextUnknownCell(row, col);
@@ -144,7 +144,7 @@ class NonogramSolver {
     const { row: nextRow, col: nextCol } = nextUnknown;
 
     for (const value of [true, false]) {
-      if (this.solutionCount >= 2) return;
+      if (this.solutionCount >= 2) {return;}
 
       const wasNull = this.snapshotNullCells();
       // 採用・棄却を問わず、この分岐で確定したセルはループの最後で必ず巻き戻す。
@@ -212,12 +212,12 @@ class NonogramSolver {
   private isValidSolution(): boolean {
     // 全ての行をチェック
     for (let row = 0; row < this.rowCount; row++) {
-      if (!this.isRowValid(row)) return false;
+      if (!this.isRowValid(row)) {return false;}
     }
 
     // 全ての列をチェック
     for (let col = 0; col < this.colCount; col++) {
-      if (!this.isColValid(col)) return false;
+      if (!this.isColValid(col)) {return false;}
     }
 
     return true;
@@ -246,7 +246,7 @@ class NonogramSolver {
 
   // 配列の比較
   private arraysEqual(a: number[], b: number[]): boolean {
-    if (a.length !== b.length) return false;
+    if (a.length !== b.length) {return false;}
     return a.every((val, index) => val === b[index]);
   }
 
@@ -267,7 +267,19 @@ class NonogramSolver {
   public printCurrentGrid(): void {
     console.log("現在のグリッド状態:");
     for (const row of this.grid) {
-      console.log(row.map((cell) => (cell === true ? "■" : cell === false ? "□" : "?")).join(""));
+      console.log(
+        row
+          .map((cell) => {
+            if (cell === true) {
+              return "■";
+            }
+            if (cell === false) {
+              return "□";
+            }
+            return "?";
+          })
+          .join(""),
+      );
     }
   }
 }

@@ -13,7 +13,9 @@
   "rules": {
     "tailwindcss/no-unknown-classes": "error",
     "tailwindcss/no-conflicting-classes": "error",
-    "tailwindcss/enforce-sort-order": "warn"
+    "tailwindcss/enforce-sort-order": "error",
+    "curly": ["error", "all"],
+    "no-nested-ternary": "error"
   },
   "env": {
     "builtin": true

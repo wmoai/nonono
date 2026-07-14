@@ -88,12 +88,12 @@ class NonogramSolver {
   private isValidPartial(row: number, col: number): boolean {
     // 現在の行が完成している場合、行のヒントをチェック
     if (col === this.cols - 1) {
-      if (!this.isRowValid(row)) return false;
+      if (!this.isRowValid(row)) {return false;}
     }
 
     // 現在の列が完成している場合、列のヒントをチェック
     if (row === this.rows - 1) {
-      if (!this.isColValid(col)) return false;
+      if (!this.isColValid(col)) {return false;}
     }
 
     return true;
@@ -103,12 +103,12 @@ class NonogramSolver {
   private isValidSolution(): boolean {
     // 全ての行をチェック
     for (let row = 0; row < this.rows; row++) {
-      if (!this.isRowValid(row)) return false;
+      if (!this.isRowValid(row)) {return false;}
     }
 
     // 全ての列をチェック
     for (let col = 0; col < this.cols; col++) {
-      if (!this.isColValid(col)) return false;
+      if (!this.isColValid(col)) {return false;}
     }
 
     return true;
@@ -160,7 +160,7 @@ class NonogramSolver {
 
   // 配列の比較
   private arraysEqual(a: number[], b: number[]): boolean {
-    if (a.length !== b.length) return false;
+    if (a.length !== b.length) {return false;}
     return a.every((val, index) => val === b[index]);
   }
 
