@@ -54,19 +54,22 @@ export class NonogramPuzzle {
 
   updateHintByGrid() {
     // 行ヒント
-    this.hint.row = this.grid.map((row) => lineToHint(row));
+    this.hint.row = this.grid.map((row) => lineToHint(row.map(isBlackCell)));
     // 列ヒント
     const cols = [...Array(this.size)].map((_, index) => this.grid.map((row) => row[index]));
-    this.hint.col = cols.map((col) => lineToHint(col));
+    this.hint.col = cols.map((col) => lineToHint(col.map(isBlackCell)));
     return this.clone();
   }
 }
 
-const lineToHint = (line: NonogramCell[]): number[] => {
+const isBlackCell = (cell: NonogramCell): boolean => cell === "o";
+
+// 行（または列）から連続する黒マスの長さを連長エンコードしたヒントを求める
+export const lineToHint = (line: boolean[]): number[] => {
   const result: number[] = [];
   let count = 0;
-  line.forEach((cell) => {
-    if (cell === "o") {
+  line.forEach((isBlack) => {
+    if (isBlack) {
       count++;
     } else if (count > 0) {
       result.push(count);

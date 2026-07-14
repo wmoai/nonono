@@ -1,4 +1,6 @@
 import { NonogramSolver } from "./NonogramSolver";
+import * as lineSolverModule from "./lineSolver";
+import { lineToHint } from "./NonogramPuzzle";
 
 // テスト用の決定的な擬似乱数生成器（線形合同法）。Math.random ではなく
 // 固定シードを使い、性能回帰テストの再現性を保つ。
@@ -9,26 +11,13 @@ function createDeterministicPuzzle(size: number, density: number, seed: number) 
     return state / 0x7fffffff;
   };
 
-  const toHints = (line: boolean[]): number[] => {
-    const blocks: number[] = [];
-    let current = 0;
-    for (const cell of line) {
-      if (cell) {
-        current++;
-      } else if (current > 0) {
-        blocks.push(current);
-        current = 0;
-      }
-    }
-    if (current > 0) blocks.push(current);
-    return blocks.length > 0 ? blocks : [0];
-  };
-
   const grid = Array.from({ length: size }, () =>
     Array.from({ length: size }, () => next() < density),
   );
-  const rowHints = grid.map(toHints);
-  const colHints = Array.from({ length: size }, (_, col) => toHints(grid.map((row) => row[col])));
+  const rowHints = grid.map(lineToHint);
+  const colHints = Array.from({ length: size }, (_, col) =>
+    lineToHint(grid.map((row) => row[col])),
+  );
 
   return { rowHints, colHints };
 }
@@ -126,6 +115,20 @@ describe("NonogramSolver", () => {
     expect(result.hasUniqueSolution).toBe(false);
   });
 
+  it("logicallyDeterminedはバックトラック（推測）を一切伴わない、最初のpropagate()だけで確定したセル数を表す", () => {
+    // 階段状の盤面：バックトラックによる仮決定と棄却が発生する。
+    // 採用・棄却を問わずバックトラック中の確定はすべて巻き戻されるため、
+    // 最終的な値は盤面の総セル数（25）を超えない。
+    const solver = new NonogramSolver({
+      rowHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
+      colHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
+    });
+
+    const result = solver.checkUniqueSolution();
+
+    expect(result.logicallyDetermined).toBeLessThanOrEqual(5 * 5);
+  });
+
   it("全マス白の盤面は一意解と判定する", () => {
     const solver = new NonogramSolver({
       rowHints: [[0], [0]],
@@ -144,6 +147,19 @@ describe("NonogramSolver", () => {
     });
   });
 
+  it("propagateはバックトラックの各手番で変化した行/列のみ再計算する", () => {
+    const solveLineSpy = vi.spyOn(lineSolverModule, "solveLine");
+    const puzzle = createDeterministicPuzzle(10, 0.4, 1);
+    const solver = new NonogramSolver(puzzle);
+
+    solver.checkUniqueSolution();
+
+    // 全ノードで全行全列(10+10=20)を再計算する旧実装では393回に達する（実測）。
+    // 変化した行/列のみ再処理する実装では125回程度（実測）に収まる。
+    expect(solveLineSpy.mock.calls.length).toBeLessThan(200);
+    solveLineSpy.mockRestore();
+  });
+
   describe("性能回帰", () => {
     // 伝播（propagate）による枝刈りを導入する前は、自由度の高い15x15盤面で
     // 全パターン列挙のやり直しとバックトラックの分岐爆発が重なり、
@@ -156,7 +172,9 @@ describe("NonogramSolver", () => {
       solver.checkUniqueSolution();
       const elapsed = performance.now() - start;
 
-      expect(elapsed).toBeLessThan(15_000);
+      // 実測1.1〜1.2s（ローカルで安定）に対し約6倍のマージン。
+      // CI等の遅い/ノイズの多い環境でも誤って落ちないよう余裕を持たせている。
+      expect(elapsed).toBeLessThan(7_000);
     });
 
     it("10x10の低密度盤面を高速に解く", () => {

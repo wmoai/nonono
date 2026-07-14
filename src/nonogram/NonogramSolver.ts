@@ -1,4 +1,5 @@
 import { solveLine } from "./lineSolver";
+import { lineToHint } from "./NonogramPuzzle";
 
 interface NonogramPuzzle {
   rowHints: number[][];
@@ -9,27 +10,27 @@ interface SolutionResult {
   hasUniqueSolution: boolean;
   solutionCount: number;
   solution: boolean[][] | null;
-  logicallyDetermined?: number; // 論理的に確定したセルの数
+  logicallyDetermined?: number; // バックトラック（推測）を一切伴わない、最初のpropagate()だけで確定したセル数
 }
 
 class NonogramSolver {
   private rowCount: number;
   private colCount: number;
-  private rowHints: number[][];
-  private colHints: number[][];
   private grid: (boolean | null)[][];
   private solutionCount: number = 0;
   private firstSolution: boolean[][] | null = null;
   private logicallyDeterminedCount: number = 0;
+  private readonly normalizedRowHints: number[][];
+  private readonly normalizedColHints: number[][];
 
   constructor(puzzle: NonogramPuzzle) {
-    this.rowHints = puzzle.rowHints;
-    this.colHints = puzzle.colHints;
     this.rowCount = puzzle.rowHints.length;
     this.colCount = puzzle.colHints.length;
     this.grid = Array(this.rowCount)
       .fill(null)
       .map(() => Array(this.colCount).fill(null));
+    this.normalizedRowHints = puzzle.rowHints.map((hints) => this.normalizeHints(hints));
+    this.normalizedColHints = puzzle.colHints.map((hints) => this.normalizeHints(hints));
   }
 
   // メイン関数：解の一意性を判定
@@ -56,69 +57,68 @@ class NonogramSolver {
     };
   }
 
-  // 論理的推論による確定処理。行/列のいずれかが矛盾したら false を返す
-  private propagate(): boolean {
-    let changed = true;
-    let iterations = 0;
-    const maxIterations = 100; // 無限ループ防止
+  // 論理的推論による確定処理。dirtyRows/dirtyColsが変化しうる行/列（省略時は全行/全列）。
+  // 変化した行/列だけを次の波で再処理するワークリスト方式のため、各セルは高々1回しか
+  // 未確定→確定にならず反復は有限回で収束する。行/列のいずれかが矛盾したら false を返す
+  private propagate(dirtyRows?: Iterable<number>, dirtyCols?: Iterable<number>): boolean {
+    let rowsToProcess = new Set<number>(
+      dirtyRows ?? Array.from({ length: this.rowCount }, (_, row) => row),
+    );
+    let colsToProcess = new Set<number>(
+      dirtyCols ?? Array.from({ length: this.colCount }, (_, col) => col),
+    );
 
-    while (changed && iterations < maxIterations) {
-      changed = false;
-      iterations++;
-
-      // 各行を処理
-      for (let row = 0; row < this.rowCount; row++) {
-        const { pattern, feasible } = solveLine(
-          this.grid[row],
-          this.normalizeHints(this.rowHints[row]),
-        );
+    while (rowsToProcess.size > 0 || colsToProcess.size > 0) {
+      const nextDirtyCols = new Set<number>();
+      for (const row of rowsToProcess) {
+        const { pattern, feasible } = solveLine(this.grid[row], this.normalizedRowHints[row]);
         if (!feasible) return false;
 
-        if (this.applyPattern(row, -1, pattern)) {
-          changed = true;
-        }
+        this.applyPattern(row, -1, pattern, nextDirtyCols);
       }
 
-      // 各列を処理
-      for (let col = 0; col < this.colCount; col++) {
+      const nextDirtyRows = new Set<number>();
+      for (const col of colsToProcess) {
         const column = this.grid.map((row) => row[col]);
-        const { pattern, feasible } = solveLine(column, this.normalizeHints(this.colHints[col]));
+        const { pattern, feasible } = solveLine(column, this.normalizedColHints[col]);
         if (!feasible) return false;
 
-        if (this.applyPattern(-1, col, pattern)) {
-          changed = true;
-        }
+        this.applyPattern(-1, col, pattern, nextDirtyRows);
       }
+
+      rowsToProcess = nextDirtyRows;
+      colsToProcess = nextDirtyCols;
     }
 
     return true;
   }
 
-  // パターンをグリッドに適用
-  private applyPattern(row: number, col: number, pattern: (boolean | null)[]): boolean {
-    let changed = false;
-
+  // パターンをグリッドに適用し、新たに確定したセルの直交方向インデックスをdirtyに追加する
+  private applyPattern(
+    row: number,
+    col: number,
+    pattern: (boolean | null)[],
+    dirty: Set<number>,
+  ): void {
     if (row >= 0) {
       // 行に適用
-      for (let c = 0; c < this.colCount; c++) {
-        if (this.grid[row][c] === null && pattern[c] !== null) {
-          this.grid[row][c] = pattern[c];
+      for (let colIndex = 0; colIndex < this.colCount; colIndex++) {
+        if (this.grid[row][colIndex] === null && pattern[colIndex] !== null) {
+          this.grid[row][colIndex] = pattern[colIndex];
           this.logicallyDeterminedCount++;
-          changed = true;
+          dirty.add(colIndex);
         }
       }
     } else if (col >= 0) {
       // 列に適用
-      for (let r = 0; r < this.rowCount; r++) {
-        if (this.grid[r][col] === null && pattern[r] !== null) {
-          this.grid[r][col] = pattern[r];
+      for (let rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
+        if (this.grid[rowIndex][col] === null && pattern[rowIndex] !== null) {
+          this.grid[rowIndex][col] = pattern[rowIndex];
           this.logicallyDeterminedCount++;
-          changed = true;
+          dirty.add(rowIndex);
         }
       }
     }
-
-    return changed;
   }
 
   // 最初の未確定セルを見つける
@@ -152,9 +152,12 @@ class NonogramSolver {
       if (this.solutionCount >= 2) return;
 
       const wasNull = this.snapshotNullCells();
+      // 採用・棄却を問わず、この分岐で確定したセルはループの最後で必ず巻き戻す。
+      // これによりlogicallyDeterminedCountは推測を一切伴わない確定数のみを表し続ける。
+      const determinedBeforeGuess = this.logicallyDeterminedCount;
       this.grid[nextRow][nextCol] = value;
 
-      if (this.propagate()) {
+      if (this.propagate([nextRow], [nextCol])) {
         const filled = this.findFirstUnknownCell();
         if (filled) {
           this.backtrack(filled.row, filled.col);
@@ -164,6 +167,7 @@ class NonogramSolver {
       }
 
       this.restoreNullCells(wasNull);
+      this.logicallyDeterminedCount = determinedBeforeGuess;
     }
   }
 
@@ -226,38 +230,15 @@ class NonogramSolver {
 
   // 行のヒントとの一致をチェック
   private isRowValid(row: number): boolean {
-    const blocks = this.getBlocks(this.grid[row]);
-    const normalizedHints = this.normalizeHints(this.rowHints[row]);
-    return this.arraysEqual(blocks, normalizedHints);
+    const blocks = this.normalizeHints(lineToHint(this.grid[row].map((cell) => cell === true)));
+    return this.arraysEqual(blocks, this.normalizedRowHints[row]);
   }
 
   // 列のヒントとの一致をチェック
   private isColValid(col: number): boolean {
     const column = this.grid.map((row) => row[col]);
-    const blocks = this.getBlocks(column);
-    const normalizedHints = this.normalizeHints(this.colHints[col]);
-    return this.arraysEqual(blocks, normalizedHints);
-  }
-
-  // セルの配列から連続する黒いブロックの長さを取得
-  private getBlocks(line: (boolean | null)[]): number[] {
-    const blocks: number[] = [];
-    let currentBlock = 0;
-
-    for (const cell of line) {
-      if (cell === true) {
-        currentBlock++;
-      } else if (currentBlock > 0) {
-        blocks.push(currentBlock);
-        currentBlock = 0;
-      }
-    }
-
-    if (currentBlock > 0) {
-      blocks.push(currentBlock);
-    }
-
-    return blocks;
+    const blocks = this.normalizeHints(lineToHint(column.map((cell) => cell === true)));
+    return this.arraysEqual(blocks, this.normalizedColHints[col]);
   }
 
   // ヒントを正規化（[0] を [] に変換）
