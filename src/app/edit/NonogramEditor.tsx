@@ -8,6 +8,7 @@ import {
   NonogramSize,
   nonogramSizes,
 } from "@/nonogram/NonogramPuzzle";
+import { NonogramSolver } from "@/nonogram/NonogramSolver";
 
 import { NonogramUI } from "./NonogramUI";
 
@@ -45,6 +46,17 @@ export const NonogramEditor: FC = () => {
           setPuzzle(puzzle.setCell({ x, y, cell: drawCell }).updateHintByGrid());
         }}
       />
+      <button
+        type="button"
+        onClick={() => {
+          const solver = new NonogramSolver(puzzle.hint);
+          console.time("solver");
+          console.log(solver.checkUniqueSolution());
+          console.timeEnd("solver");
+        }}
+      >
+        解析
+      </button>
     </div>
   );
 };

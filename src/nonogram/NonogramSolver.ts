@@ -1,10 +1,5 @@
 import { solveLine } from "./lineSolver";
-import { lineToHint } from "./NonogramPuzzle";
-
-interface NonogramPuzzle {
-  rowHints: number[][];
-  colHints: number[][];
-}
+import { lineToHint, NonogramHint } from "./NonogramPuzzle";
 
 interface SolutionResult {
   hasUniqueSolution: boolean;
@@ -23,14 +18,14 @@ class NonogramSolver {
   private readonly normalizedRowHints: number[][];
   private readonly normalizedColHints: number[][];
 
-  constructor(puzzle: NonogramPuzzle) {
-    this.rowCount = puzzle.rowHints.length;
-    this.colCount = puzzle.colHints.length;
+  constructor(hint: NonogramHint) {
+    this.rowCount = hint.row.length;
+    this.colCount = hint.col.length;
     this.grid = Array(this.rowCount)
       .fill(null)
       .map(() => Array(this.colCount).fill(null));
-    this.normalizedRowHints = puzzle.rowHints.map((hints) => this.normalizeHints(hints));
-    this.normalizedColHints = puzzle.colHints.map((hints) => this.normalizeHints(hints));
+    this.normalizedRowHints = hint.row.map((hints) => this.normalizeHints(hints));
+    this.normalizedColHints = hint.col.map((hints) => this.normalizeHints(hints));
   }
 
   // メイン関数：解の一意性を判定
@@ -276,56 +271,5 @@ class NonogramSolver {
     }
   }
 }
-
-// 使用例
-export function example() {
-  // テストケース1: 複雑なパズル
-  const puzzle1: NonogramPuzzle = {
-    rowHints: [[2, 1], [1, 1], [5], [1, 1], [2, 1]],
-    colHints: [[5], [1, 1], [1], [1, 1], [5]],
-  };
-
-  // テストケース2: 空のヒント（[0]）を含むパズル
-  const puzzle2: NonogramPuzzle = {
-    rowHints: [[0], [1], [1], [1], [0]],
-    colHints: [[0], [1], [1], [1], [0]],
-  };
-
-  // テストケース3: より大きなパズル
-  const puzzle3: NonogramPuzzle = {
-    rowHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
-    colHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
-  };
-
-  console.log("=== テストケース1 ===");
-  const solver1 = new NonogramSolver(puzzle1);
-  const result1 = solver1.checkUniqueSolution();
-  console.log(`解の数: ${result1.solutionCount}`);
-  console.log(`一意解?: ${result1.hasUniqueSolution}`);
-  console.log(`論理的に確定: ${result1.logicallyDetermined}セル`);
-
-  console.log("\n=== テストケース2 ===");
-  const solver2 = new NonogramSolver(puzzle2);
-  const result2 = solver2.checkUniqueSolution();
-  console.log(`解の数: ${result2.solutionCount}`);
-  console.log(`一意解?: ${result2.hasUniqueSolution}`);
-  console.log(`論理的に確定: ${result2.logicallyDetermined}セル`);
-
-  console.log("\n=== テストケース3 ===");
-  const solver3 = new NonogramSolver(puzzle3);
-  const result3 = solver3.checkUniqueSolution();
-  console.log(`解の数: ${result3.solutionCount}`);
-  console.log(`一意解?: ${result3.hasUniqueSolution}`);
-  console.log(`論理的に確定: ${result3.logicallyDetermined}セル`);
-
-  if (result3.solution) {
-    solver3.printSolution();
-  }
-
-  return { result1, result2, result3 };
-}
-
-// テスト実行
-example();
 
 export { NonogramSolver };

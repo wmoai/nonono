@@ -1,6 +1,6 @@
-import { NonogramSolver } from "./NonogramSolver";
 import * as lineSolverModule from "./lineSolver";
 import { lineToHint } from "./NonogramPuzzle";
+import { NonogramSolver } from "./NonogramSolver";
 
 // テスト用の決定的な擬似乱数生成器（線形合同法）。Math.random ではなく
 // 固定シードを使い、性能回帰テストの再現性を保つ。
@@ -19,20 +19,14 @@ function createDeterministicPuzzle(size: number, density: number, seed: number) 
     lineToHint(grid.map((row) => row[col])),
   );
 
-  return { rowHints, colHints };
+  return { row: rowHints, col: colHints };
 }
 
 describe("NonogramSolver", () => {
   it("ヒントが矛盾する盤面は解なしと判定する", () => {
     const solver = new NonogramSolver({
-      rowHints: [
-        [2, 1],
-        [1, 1],
-        [5],
-        [1, 1],
-        [2, 1],
-      ],
-      colHints: [[5], [1, 1], [1], [1, 1], [5]],
+      row: [[2, 1], [1, 1], [5], [1, 1], [2, 1]],
+      col: [[5], [1, 1], [1], [1, 1], [5]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -44,8 +38,8 @@ describe("NonogramSolver", () => {
 
   it("複数解を持つ盤面は2件目を検出した時点で非一意と判定する", () => {
     const solver = new NonogramSolver({
-      rowHints: [[0], [1], [1], [1], [0]],
-      colHints: [[0], [1], [1], [1], [0]],
+      row: [[0], [1], [1], [1], [0]],
+      col: [[0], [1], [1], [1], [0]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -56,20 +50,8 @@ describe("NonogramSolver", () => {
 
   it("階段状の盤面は複数解を持つと判定し、解の1つを返す", () => {
     const solver = new NonogramSolver({
-      rowHints: [
-        [3],
-        [1, 1],
-        [1, 1],
-        [1, 1],
-        [3],
-      ],
-      colHints: [
-        [3],
-        [1, 1],
-        [1, 1],
-        [1, 1],
-        [3],
-      ],
+      row: [[3], [1, 1], [1, 1], [1, 1], [3]],
+      col: [[3], [1, 1], [1, 1], [1, 1], [3]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -87,8 +69,8 @@ describe("NonogramSolver", () => {
 
   it("全マス黒の盤面は一意解と判定する", () => {
     const solver = new NonogramSolver({
-      rowHints: [[2], [2]],
-      colHints: [[2], [2]],
+      row: [[2], [2]],
+      col: [[2], [2]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -105,8 +87,8 @@ describe("NonogramSolver", () => {
 
   it("2x2の順列盤面は複数解と判定する", () => {
     const solver = new NonogramSolver({
-      rowHints: [[1], [1]],
-      colHints: [[1], [1]],
+      row: [[1], [1]],
+      col: [[1], [1]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -120,8 +102,8 @@ describe("NonogramSolver", () => {
     // 採用・棄却を問わずバックトラック中の確定はすべて巻き戻されるため、
     // 最終的な値は盤面の総セル数（25）を超えない。
     const solver = new NonogramSolver({
-      rowHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
-      colHints: [[3], [1, 1], [1, 1], [1, 1], [3]],
+      row: [[3], [1, 1], [1, 1], [1, 1], [3]],
+      col: [[3], [1, 1], [1, 1], [1, 1], [3]],
     });
 
     const result = solver.checkUniqueSolution();
@@ -131,8 +113,8 @@ describe("NonogramSolver", () => {
 
   it("全マス白の盤面は一意解と判定する", () => {
     const solver = new NonogramSolver({
-      rowHints: [[0], [0]],
-      colHints: [[0], [0]],
+      row: [[0], [0]],
+      col: [[0], [0]],
     });
 
     const result = solver.checkUniqueSolution();
